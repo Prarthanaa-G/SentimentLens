@@ -1,0 +1,19 @@
+name: CD to Render
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Slim Docker Image"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: |
+          echo " CI workflow completed successfully. Triggering Render deployment..."
+          curl -X GET "${{ secrets.RENDER_DEPLOY_HOOK }}"
+
