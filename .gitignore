@@ -10,6 +10,7 @@ Data/
 Logs/
 Artifacts/model.safetensors
 
+
 # Distribution / packaging
 .Python
 build/
