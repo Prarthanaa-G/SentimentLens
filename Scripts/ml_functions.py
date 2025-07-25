@@ -5,40 +5,44 @@ from sklearn.metrics import confusion_matrix, accuracy_score, classification_rep
 from helper_functions import log_info, log_error
 from transformers import DistilBertTokenizerFast, Trainer, TrainingArguments,DistilBertTokenizerFast,DistilBertForSequenceClassification
 import torch
+import numpy as np
+import streamlit as st
+from collections import namedtuple
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ARTIFACTS_DIR = os.path.join(BASE_DIR, 'Artifacts')
-
 LABEL_ENCODER_PATH = os.path.join(ARTIFACTS_DIR, "label_encoder.pkl")
-MODEL_PATH = os.path.join(ARTIFACTS_DIR, "logistic_regression_model.pkl")
 
-# def load_model():
-#     try:
-#         with open(MODEL_PATH, 'rb') as f:
-#             model = pickle.load(f)
-#         log_info("Model loaded successfully.")
-#         return model
-#     except FileNotFoundError as e:
-#         log_error(f"Model file not found: {e}")
-#         raise
 
-def load_label_encoder():
+
+
+@st.cache_resource
+def load_artifacts():
+    """Loads and caches the model, tokenizer, and label encoder."""
     try:
+        
+        model = DistilBertForSequenceClassification.from_pretrained(ARTIFACTS_DIR)
+        log_info("Model loaded and quantized dynamically using PyTorch.")
+        tokenizer = DistilBertTokenizerFast.from_pretrained(ARTIFACTS_DIR)
         with open(LABEL_ENCODER_PATH, 'rb') as f:
             label_encoder = pickle.load(f)
-        return label_encoder
-    except FileNotFoundError as e:
-        log_error(f"Label encoder file not found: {e}")
-        raise
-    
+            
+        log_info("Model, tokenizer, and label encoder loaded successfully.")
+        return model, tokenizer, label_encoder
+    except Exception as e:
+        log_error(f"Error loading artifacts: {e}")
+        st.error(f"Fatal error: Could not load ML model artifacts. Please check logs. Error: {e}")
+        return None, None, None
+
+  
     
 def training_pipeline(X_train, y_train):
     try:
-        X_train = X_train[:15000]
-        y_train = y_train[:15000]
-        tokenizer = DistilBertTokenizerFast.from_pretrained('prajjwal1/bert-tiny')
+        X_train = X_train[:10000]
+        y_train = y_train[:10000]
+        tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
         model = DistilBertForSequenceClassification.from_pretrained(
-            'prajjwal1/bert-tiny',
+            'distilbert-base-uncased',
             num_labels=len(set(y_train))
         )
 
@@ -83,103 +87,55 @@ def training_pipeline(X_train, y_train):
         log_error(f"Error during BERT training: {e}")
         raise
 
-def load_model():
-    try:
-        model = DistilBertForSequenceClassification.from_pretrained(ARTIFACTS_DIR)
-        log_info("BERT model loaded successfully.")
-        return model
-    except Exception as e:
-        log_error(f"Model file not found: {e}")
-        raise
 
-def prediction_pipeline(X_val):
+def prediction_pipeline(comments,model,tokenizer,label_encoder):
+    """
+    Performs sentiment analysis on a list of comments using the pre-loaded model.
+    """
+    if not all([model, tokenizer, label_encoder]):
+         return ["Error: Model not loaded"] * len(comments)
+
     try:
-        model = load_model()
-        tokenizer = DistilBertTokenizerFast.from_pretrained(ARTIFACTS_DIR)
-        label_encoder = load_label_encoder()
-        encodings = tokenizer(list(X_val), truncation=True, padding=True, max_length=128, return_tensors='pt')
+        # Tokenize all comments
+        inputs = tokenizer(comments, truncation=True, padding=True, max_length=128, return_tensors='pt')
+
+        # Perform inference
         with torch.no_grad():
-            outputs = model(**encodings)
-            preds_encoded = torch.argmax(outputs.logits, dim=1).numpy()
-        preds_decoded = label_encoder.inverse_transform(preds_encoded)
-        return preds_decoded
+            outputs = model(**inputs)
+            pred_idxs = torch.argmax(outputs.logits, dim=1).numpy()
+        
+        # Decode predictions
+        sentiments = label_encoder.inverse_transform(pred_idxs)
+        return sentiments
     except Exception as e:
-        log_error(f"Prediction failed: {e}")
-        raise
+        log_error(f"Error during prediction: {e}")
+        return [f"Error: {e}"] * len(comments)
+    
+    
 
-# def training_pipeline(X_train, y_train):
-#     from sklearn.linear_model import LogisticRegression
-#     try:
-#         model = LogisticRegression(
-#         max_iter=5000,
-#         penalty='l2',
-#         class_weight='balanced'
-#     )
-#         model.fit(X_train, y_train)
-#         with open(MODEL_PATH, 'wb') as f:
-#             pickle.dump(model, f)
-#         log_info(f"Model trained and saved at {MODEL_PATH}")
-#         return model
-#     except Exception as e:
-#         log_error(f"Error during training: {e}")
-#         raise
+def evaluation_metrics(X_val, y_val_encoded, batch_size=32):
+    try:      
+        model, tokenizer, label_encoder = load_artifacts()
 
+        preds_encoded = []
+        for i in range(0, len(X_val), batch_size):
+            batch_texts = list(X_val[i:i+batch_size])
+            encodings = tokenizer(batch_texts, truncation=True, padding=True, max_length=128, return_tensors='pt')
+            with torch.no_grad():
+                outputs = model(**encodings)
+                batch_preds = torch.argmax(outputs.logits, dim=1).numpy()
+                preds_encoded.extend(batch_preds)
 
-# def prediction_pipeline(X_val):
-#     try:
-#         model = load_model()
-#         label_encoder = load_label_encoder()
-#         preds_encoded = model.predict(X_val)
-#         preds_decoded = label_encoder.inverse_transform(preds_encoded)
-#         return preds_decoded
-#     except Exception as e:
-#         log_error(f"Prediction failed: {e}")
-#         raise
-
-# def evaluation_metrics(X_val, y_val_encoded):
-#     try:
-#         model = load_model()
-#         label_map = load_label_encoder()  # This is a dict
-
-#         preds_encoded = model.predict(X_val)
-
-#         # Manually invert the mapping
-#         reverse_map = {v: k for k, v in label_map.items()}
-#         preds_decoded = [reverse_map[p] for p in preds_encoded]
-#         true_labels_decoded = [reverse_map[y] for y in y_val_encoded]
-
-#         conf_matrix = confusion_matrix(true_labels_decoded, preds_decoded, labels=list(label_map.keys()))
-#         acc_score = accuracy_score(true_labels_decoded, preds_decoded)
-#         class_report = classification_report(true_labels_decoded, preds_decoded)
-#         print(conf_matrix, acc_score, class_report)
-#         log_info("Evaluation metrics computed successfully.")
-#         return conf_matrix, acc_score, class_report
-#     except Exception as e:
-#         log_error(f"Evaluation failed: {e}")
-#         raise
-
-def evaluation_metrics(X_val, y_val_encoded):
-    try:
-        model = load_model()
-        tokenizer = DistilBertTokenizerFast.from_pretrained(ARTIFACTS_DIR)
-        label_encoder = load_label_encoder()
-
-        # Tokenize validation data
-        encodings = tokenizer(list(X_val), truncation=True, padding=True, max_length=128, return_tensors='pt')
-        with torch.no_grad():
-            outputs = model(**encodings)
-            preds_encoded = torch.argmax(outputs.logits, dim=1).numpy()
-
-        # Decode predictions and true labels
+        preds_encoded = np.array(preds_encoded)
         preds_decoded = label_encoder.inverse_transform(preds_encoded)
         true_labels_decoded = label_encoder.inverse_transform(y_val_encoded)
 
         conf_matrix = confusion_matrix(true_labels_decoded, preds_decoded, labels=label_encoder.classes_)
         acc_score = accuracy_score(true_labels_decoded, preds_decoded)
         class_report = classification_report(true_labels_decoded, preds_decoded)
-        print(conf_matrix, acc_score, class_report)
         log_info("Evaluation metrics computed successfully.")
         return conf_matrix, acc_score, class_report
     except Exception as e:
         log_error(f"Evaluation failed: {e}")
         raise
+

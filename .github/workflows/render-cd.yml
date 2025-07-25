@@ -16,4 +16,3 @@ jobs:
         run: |
           echo " CI workflow completed successfully. Triggering Render deployment..."
           curl -X GET "${{ secrets.RENDER_DEPLOY_HOOK }}"
-

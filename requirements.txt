@@ -24,3 +24,6 @@ scipy==1.15.2
 streamlit==1.42.2
 transformers
 torch
+wordcloud
+plotly
+# onnxruntime

@@ -37,27 +37,9 @@ def main():
 
     X_train_raw, X_val_raw, y_train, y_val = train_test_split(X_raw, y_encoded, test_size=0.2, random_state=42)
 
-    # text_pipeline = create_text_pipeline()
-    # X_train = text_pipeline.fit_transform(X_train_raw)
-    # X_val = text_pipeline.transform(X_val_raw)
-    # save_pipeline(text_pipeline)
-    # log_info("✅ Text pipeline fitted and saved")
 
     model = training_pipeline(X_train_raw, y_train)
-    # with open(MODEL_PATH, "wb") as f:
-    #     pickle.dump(model, f)
-    # log_info("✅ Model trained and saved")
-    
-    
-    # ...existing code...
 
-    # Evaluate model and print accuracy
-    # conf_matrix, acc_score, class_report = evaluation_metrics(X_val_raw, y_val)
-    # print(f"Validation Accuracy: {acc_score:.4f}")
-
-    # log_info("✅ Evaluation metrics computed")
-
-# ...existing code...
 
 if __name__ == "__main__":
     main()
