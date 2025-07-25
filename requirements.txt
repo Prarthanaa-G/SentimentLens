@@ -26,4 +26,5 @@ transformers
 torch
 wordcloud
 plotly
+google-api-python-client
 # onnxruntime
