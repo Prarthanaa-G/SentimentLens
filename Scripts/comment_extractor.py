@@ -2,8 +2,6 @@ from googleapiclient.discovery import build
 import dotenv
 import os
 import re
-import streamlit as st
-from langdetect import detect
 
 dotenv.load_dotenv()
 

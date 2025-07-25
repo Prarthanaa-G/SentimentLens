@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from helper_functions import log_info, log_error
 from collections import Counter
 from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 st.set_page_config(page_title="YouTube Sentiment Analyzer", layout="centered")

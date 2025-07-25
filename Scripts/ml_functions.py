@@ -7,7 +7,7 @@ from transformers import DistilBertTokenizerFast, Trainer, TrainingArguments,Dis
 import torch
 import numpy as np
 import streamlit as st
-from collections import namedtuple
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ARTIFACTS_DIR = os.path.join(BASE_DIR, 'Artifacts')
