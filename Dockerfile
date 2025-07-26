@@ -5,13 +5,15 @@ FROM python:3.10-slim
 # Set working directory inside container
 WORKDIR /app
 
-# Install system dependencies required for curl
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Install system dependencies for build tools and curl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip cache purge
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Download large model from external source into Artifacts directory
 # Replace the URL below with your actual model link
