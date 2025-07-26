@@ -1,9 +1,9 @@
 name: Deploy to Hugging Face Spaces
 
 on:
-  push:
-    branches:
-      - main  # Trigger on pushes to main
+  # push:
+  #   branches:
+  #     - main  # Trigger on pushes to main
   
   workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
 
@@ -17,7 +17,7 @@ jobs:
 
       - name: Push to Hugging Face Hub
         # This is the key action that pushes your code to the Spaces repo
-        uses: huggingface-hub/push-to-hub@v0
+        uses: huggingface-hub/push-to-hub@v0.20.3
         with:
           # Your Hugging Face username / your Space name
           # Example: "Prarthana1/sentiment-analysis-slim"
