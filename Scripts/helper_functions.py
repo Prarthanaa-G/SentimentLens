@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+# load_dotenv()
 
 # Define base paths dynamically
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -11,7 +11,7 @@ load_dotenv()
 # LOGS_DIR = os.path.join(BASE_DIR, os.getenv('LOGS_DIR'))
 
 # Directly use the env variable (no BASE_DIR)
-LOGS_DIR = os.getenv("LOGS_DIR", "/tmp/logs")
+LOGS_DIR = 'Logs'
 os.makedirs(LOGS_DIR, exist_ok=True)
 
 print(f"LOGS_DIR is set to: {LOGS_DIR}")
