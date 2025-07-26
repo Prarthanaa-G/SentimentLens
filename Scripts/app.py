@@ -87,12 +87,12 @@ if st.button("Analyze Comments"):
                         st.image(wordcloud.to_array())
                     
                     # Display individual comments in an expander
-                    st.write("---")
-                    with st.expander("View Analyzed Comments"):
-                        for comment, sentiment in zip(comments, predictions):
-                            st.markdown(f"**Sentiment:** `{sentiment}`")
-                            st.markdown(f"> {comment}")
-                            st.markdown("---")
+                    # st.write("---")
+                    # with st.expander("View Analyzed Comments"):
+                    #     for comment, sentiment in zip(comments, predictions):
+                    #         st.markdown(f"**Sentiment:** `{sentiment}`")
+                    #         st.markdown(f"> {comment}")
+                    #         st.markdown("---")
           
             except Exception as e:
                 st.error(f"Failed to analyze video. Reason: {e}")
