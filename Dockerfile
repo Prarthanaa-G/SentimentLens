@@ -24,9 +24,9 @@ RUN mkdir -p Artifacts && \
 COPY . .
 
 # Set environment variables inside Docker
-ENV ARTIFACTS_DIR=Artifacts
-ENV DATA_DIR=Data
-ENV LOGS_DIR=Logs
+ENV DATA_DIR=/data/Data
+ENV ARTIFACTS_DIR=/data/Artifacts
+ENV LOGS_DIR=/data/Logs
 
 # Expose Streamlit default port
 EXPOSE 8501
