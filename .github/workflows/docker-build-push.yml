@@ -21,7 +21,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t prarthana11g/sentiment-analysis-slim:latest . 
+          docker build --no-cache -t prarthana11g/sentiment-analysis-slim:latest . 
 
       - name: Push Docker Image
         run: |
