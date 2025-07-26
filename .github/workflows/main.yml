@@ -1,0 +1,30 @@
+name: Deploy to Hugging Face Spaces
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to main
+  
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+jobs:
+  deploy-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        # This step checks out your code from your GitHub repo
+        uses: actions/checkout@v4
+
+      - name: Push to Hugging Face Hub
+        # This is the key action that pushes your code to the Spaces repo
+        uses: huggingface-hub/push-to-hub@v0
+        with:
+          # Your Hugging Face username / your Space name
+          # Example: "Prarthana1/sentiment-analysis-slim"
+          repo_id: ${{ secrets.HF_SPACE_REPO_ID }}
+          
+          # A Hugging Face token with write access, stored as a GitHub secret
+          token: ${{ secrets.HF_TOKEN }}
+          
+          # Specify that you are pushing to a "space"
+          repo_type: space
