@@ -19,7 +19,8 @@ RUN pip install --no-cache-dir -r requirements.txt \
 RUN mkdir -p Artifacts && \
     curl -L "https://huggingface.co/Prarthana1/sentiment-analysis-model/resolve/main/model.safetensors" -o Artifacts/model.safetensors
 
-
+# Create the directory AND give ownership to the app's user
+RUN mkdir Logs && chown -R 1000:1000 Logs
 # Copy the rest of your codebase into the container
 COPY . .
 
