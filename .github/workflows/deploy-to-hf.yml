@@ -1,0 +1,27 @@
+# .github/workflows/deploy-to-hf.yml
+
+name: Deploy to Hugging Face Spaces
+
+on:
+  # This makes the workflow run ONLY AFTER the CI workflow is completed
+  workflow_run:
+    workflows: ["Build and Push Slim Docker Image"] # The name of your CI workflow
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # This condition ensures the deployment only happens if the CI was successful
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Trigger Hugging Face Space restart
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # The curl command triggers a restart, making the Space pull the new image
+          curl -X POST \
+            -H "Authorization: Bearer $HF_TOKEN" \
+            "https://huggingface.co/api/spaces/1Prarthana14/SentimentLens/restart"

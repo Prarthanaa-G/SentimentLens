@@ -6,7 +6,7 @@ import re
 dotenv.load_dotenv()
 
     
-def get_english_comments(video_url, max_comments=40):
+def get_english_comments(video_url, max_comments=100):
     api_key = os.getenv("YOUTUBE_API_KEY")
     match = re.search(r"(?:v=|\/)([0-9A-Za-z_-]{11})", video_url)
     if not match:
